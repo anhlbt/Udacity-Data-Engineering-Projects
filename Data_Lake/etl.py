@@ -4,14 +4,13 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf, col, monotonically_increasing_id
 from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format, dayofweek
-from pyspark.sql.types import *
-
+# from pyspark.sql.types import *
+from pyspark.sql.types import StructType, StructField, DoubleType, StringType, IntegerType, TimestampType
 config = configparser.ConfigParser()
-config.read('dl.cfg')
+config.read_file(open('dl.cfg'))
 
-os.environ['AWS_ACCESS_KEY_ID'] = config['AWS_ACCESS_KEY_ID']
-os.environ['AWS_SECRET_ACCESS_KEY'] = config['AWS_SECRET_ACCESS_KEY']
-
+os.environ['AWS_ACCESS_KEY_ID']=config.get('AWS','AWS_ACCESS_KEY_ID')
+os.environ['AWS_SECRET_ACCESS_KEY']=config.get('AWS','AWS_SECRET_ACCESS_KEY')
 
 def create_spark_session():
     spark = SparkSession \
@@ -32,10 +31,23 @@ def process_song_data(spark, input_data, output_data):
     """
 
     # get filepath to song data file
-    song_data = input_data + "song_data/*/*/*/*"
+    song_data = input_data + "song_data/*/*/*/*.json"
+
+    # song_schema = StructType([
+    #     StructField("artist_id", StringType()),
+    #     StructField("artist_latitude", DoubleType()),
+    #     StructField("artist_location", StringType()),
+    #     StructField("artist_longitude", StringType()),
+    #     StructField("artist_name", StringType()),
+    #     StructField("duration", DoubleType()),
+    #     StructField("num_songs", IntegerType()),
+    #     StructField("title", StringType()),
+    #     StructField("year", IntegerType()),
+    # ])
 
     # read song data file
     df = spark.read.json(song_data, mode='PERMISSIVE', columnNameOfCorruptRecord='corrupt_record').drop_duplicates()
+    # df = spark.read.json(song_data, schema=song_schema)
 
     # extract columns to create songs table
     songs_table = df.select("song_id","title","artist_id","year","duration").drop_duplicates()
@@ -61,7 +73,7 @@ def process_log_data(spark, input_data, output_data):
     """
 
     # get filepath to log data file
-    log_data = os.path.join(input_data, "log-data/")
+    log_data = os.path.join(input_data, "log_data/*/*/*.json")
 
     # read log data file
     df = spark.read.json(log_data, mode='PERMISSIVE', columnNameOfCorruptRecord='corrupt_record').drop_duplicates()
@@ -110,8 +122,8 @@ def process_log_data(spark, input_data, output_data):
 
 def main():
     spark = create_spark_session()
-    input_data = "s3://udacity-spark-project/"
-    output_data = "s3://udacity-spark-project/output/"
+    input_data = "s3a://dataenginnerbucket/udacity-dend/"
+    output_data = "s3a://dataenginnerbucket/udacity-dend/output/"
 
     process_song_data(spark, input_data, output_data)
     process_log_data(spark, input_data, output_data)

@@ -1,0 +1,1 @@
+apache-airflow[crypto,celery,amazon,mysql,jdbc,password,redis,slack,snowflake,ssh,google,databricks,mongo,zendesk,papermill,salesforce]==2.0.1

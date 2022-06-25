@@ -1,20 +1,33 @@
 from datetime import datetime, timedelta
+import sys
+from os.path import dirname, join, realpath, isfile
+
+C_DIR = dirname(realpath(__file__))
+P_DIR = dirname(C_DIR)
+sys.path.insert(0, P_DIR)
+print(P_DIR)
 import os
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import ( CreateTableOperator, StageToRedshiftOperator, LoadFactOperator,
+from airflow.operators.dummy import DummyOperator
+# from airflow.operators import ( CreateTableOperator, StageToRedshiftOperator, LoadFactOperator,
+#                                 LoadDimensionOperator, DataQualityOperator)
+from plugins.operators import ( CreateTableOperator, StageToRedshiftOperator, LoadFactOperator,
                                 LoadDimensionOperator, DataQualityOperator)
-from helpers import SqlQueries
+from plugins.helpers import SqlQueries
 from sparkify_dimension_subdag import load_dimension_subdag
 from airflow.operators.subdag_operator import SubDagOperator
 
 
+# LOG_DATA='s3://dataenginnerbucket/udacity-dend/log_data/'
+# LOG_JSONPATH='s3://dataenginnerbucket/udacity-dend/log_json_path.json'
+# SONG_DATA='s3://dataenginnerbucket/udacity-dend/song_data/'
+
 #AWS_KEY = os.environ.get('AWS_KEY')
 #AWS_SECRET = os.environ.get('AWS_SECRET')
 
-s3_bucket = 'udacity-dend-warehouse'
+s3_bucket = 's3://dataenginnerbucket/udacity-dend'
 song_s3_key = "song_data"
-log_s3_key = "log-data"
+log_s3_key = "log_data"
 log_json_file = "log_json_path.json"
 
 default_args = {
@@ -54,7 +67,7 @@ stage_events_to_redshift = StageToRedshiftOperator(
     redshift_conn_id = "redshift",
     aws_credential_id="aws_credentials",
     dag=dag,
-    provide_context=True
+    # provide_context=True
 )
 
 
@@ -68,7 +81,7 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     redshift_conn_id = "redshift",
     aws_credential_id="aws_credentials",
     dag=dag,
-    provide_context=True
+    # provide_context=True
 )
 
 

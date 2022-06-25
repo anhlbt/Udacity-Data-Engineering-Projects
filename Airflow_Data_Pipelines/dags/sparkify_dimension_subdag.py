@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from airflow import DAG
-from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import LoadDimensionOperator
-from helpers import SqlQueries
+from airflow.operators.dummy import DummyOperator
+from plugins.operators import LoadDimensionOperator
+from plugins.helpers import SqlQueries
 
 
 def load_dimension_subdag(
